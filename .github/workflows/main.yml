@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-and-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Linting y Tests
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install flake8 pytest
+      - name: Run Tests
+        run: pytest src/
+
+      # 2. Escaneo de Seguridad (SAST)
+      - name: Security Scan (Bandit)
+        run: |
+          pip install bandit
+          bandit -r src/ -f json -o bandit-results.json || true
+
+  build-and-push:
+    needs: quality-and-security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # 3. Construcción y Escaneo de Imagen Docker
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/net-watch-prober:latest ./src/prober
+
+      - name: Scan Docker Image (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/net-watch-prober:latest'
+          format: 'table'
+          exit-code: '1' # Falla el build si hay vulnerabilidades críticas
+          severity: 'CRITICAL,HIGH'
+
+      # 4. Push a Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Push Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/net-watch-prober:latest
