@@ -12,7 +12,7 @@ Sistema automatizado de monitoreo de disponibilidad y latencia de red, diseñado
 
 ---
 
-## 📸 Evidencia de Despliegue
+## Despliegue
 
 ### 1. Pipeline CI/CD (GitHub Actions)
 El flujo automatizado compila, escanea y publica la imagen en Docker Hub ante cada commit en la rama `main`.

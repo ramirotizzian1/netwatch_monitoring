@@ -55,5 +55,10 @@ jobs:
           
       - name: Push Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/net-watch-prober:latest
+      
+      - name: Build and Push API Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/net-watch-api:latest ./src/api
+          docker push ${{ secrets.DOCKER_USERNAME }}/net-watch-api:latest 
 
 # Intento de reactivación del pipeline

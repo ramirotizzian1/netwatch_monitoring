@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: net-watch-api
+  namespace: default
+  labels:
+    app: net-watch-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: net-watch-api
+  template:
+    metadata:
+      labels:
+        app: net-watch-api
+    spec:
+      containers:
+      - name: api
+        image: ramirotizzian1/net-watch-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
