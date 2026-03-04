@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: net-watch-monitor
+  namespace: default
+  labels:
+    # Esta etiqueta es CRÍTICA. Le dice al Prometheus que instalamos que este archivo es para él.
+    release: monitoreo 
+spec:
+  selector:
+    matchLabels:
+      app: net-watch-prober
+  endpoints:
+  - port: metrics
+    interval: 15s # Cada cuánto tiempo va a leer los datos
