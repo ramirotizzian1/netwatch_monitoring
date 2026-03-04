@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: net-watch-prober
+  # Un namespace ayuda a aislar tu proyecto de telecomunicaciones del resto del clúster
+  namespace: default 
+  labels:
+    app: net-watch-prober
+spec:
+  # ¿Cuántas instancias del prober quieres corriendo en paralelo?
+  replicas: 1
+  selector:
+    matchLabels:
+      app: net-watch-prober
+  template:
+    metadata:
+      labels:
+        app: net-watch-prober
+    spec:
+      containers:
+      - name: prober
+        # AQUÍ: Pon tu usuario de Docker Hub para que K8s sepa de dónde descargar
+        image: ramirotizzian1/net-watch-prober:latest
+        # Le decimos que siempre busque la versión más nueva en Docker Hub
+        imagePullPolicy: Always
+        resources:
+          # Buenas prácticas: limitar cuánta CPU y RAM puede usar este contenedor
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
