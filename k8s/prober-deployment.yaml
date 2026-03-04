@@ -23,6 +23,8 @@ spec:
         image: ramirotizzian1/net-watch-prober:latest
         # Le decimos que siempre busque la versión más nueva en Docker Hub
         imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
         resources:
           # Buenas prácticas: limitar cuánta CPU y RAM puede usar este contenedor
           requests:
