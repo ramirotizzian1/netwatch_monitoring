@@ -1,28 +1,37 @@
-# Net-Watch: Plataforma de Observabilidad de Red
+# Net-Watch: Plataforma de Observabilidad de Red (GitOps & CI/CD)
 
-Sistema de monitoreo de disponibilidad y latencia orientado a redes de telecomunicaciones, diseñado bajo una arquitectura de microservicios y principios nativos de la nube (Cloud-Native).
+Sistema automatizado de monitoreo de disponibilidad y latencia de red, diseñado con arquitectura Cloud-Native, prácticas DevSecOps y GitOps.
 
-## Arquitectura del Sistema
-El proyecto se compone de los siguientes microservicios:
-* **Prober Service:** Script en Python encargado de ejecutar pruebas de conectividad (ICMP/Ping) contra nodos de red.
-* **API Gateway (En desarrollo):** Servicio RESTful (FastAPI) para la consulta de métricas.
-* **Time-Series Database (En desarrollo):** Almacenamiento optimizado para métricas de red (InfluxDB).
+## 🚀 Arquitectura y Tecnologías
+* **Prober Service:** Microservicio en Python que ejecuta pruebas ICMP (Ping) y expone métricas en formato Prometheus.
+* **Contenedores:** Dockerizado sobre imágenes ligeras (`python:3.10-slim`).
+* **CI/CD (DevSecOps):** GitHub Actions con pruebas automatizadas y escaneo estático de vulnerabilidades (`Trivy` y `Bandit`).
+* **Orquestación:** Kubernetes (Minikube).
+* **GitOps:** ArgoCD para la sincronización continua de manifiestos.
+* **Observabilidad:** Kube-Prometheus-Stack (Prometheus + Grafana).
 
-## Estado Actual del Despliegue (Fase 1)
+---
 
-### 1. Integración Continua (CI)
-Se ha implementado un pipeline automatizado mediante **GitHub Actions** (`.github/workflows/main.yml`) que ejecuta los siguientes stages ante cada cambio en la rama `main`:
-* **Linting & Testing:** Ejecución de pruebas unitarias con `pytest`.
-* **SAST:** Escaneo estático de vulnerabilidades en el código fuente utilizando `Bandit`.
-* **Build:** Construcción automatizada de la imagen Docker.
-* **Container Security:** Escaneo de vulnerabilidades en la imagen base mediante `Trivy`.
-* **Registry Push:** Publicación automática de la imagen validada en Docker Hub.
+## 📸 Evidencia de Despliegue
 
-### 2. Infraestructura y GitOps
-* La infraestructura se gestiona como código (IaC).
-* Se ha definido el primer manifiesto de Kubernetes (`prober-deployment.yaml`) para el despliegue del servicio Prober, estableciendo límites de recursos (CPU/RAM) y políticas de actualización de imagen.
+### 1. Pipeline CI/CD (GitHub Actions)
+El flujo automatizado compila, escanea y publica la imagen en Docker Hub ante cada commit en la rama `main`.
 
-## Próximos Pasos (Roadmap)
-- [ ] Desplegar un clúster de Kubernetes (Local o Cloud).
-- [ ] Configurar ArgoCD para la sincronización continua (GitOps) de los manifiestos.
-- [ ] Implementar el stack de observabilidad (Prometheus + Grafana).
+![Pipeline CI/CD](imagenes/github-actions.png)
+
+### 2. Despliegue GitOps (ArgoCD)
+ArgoCD monitorea este repositorio y despliega automáticamente los recursos en Kubernetes (`Deployment`, `Service`, `ServiceMonitor`).
+
+![ArgoCD Sync](imagenes/argocd-sync.png)
+
+### 3. Observabilidad (Grafana)
+Las métricas generadas por el Prober (`netwatch_ping_latency_ms`) son recolectadas por Prometheus y visualizadas en tiempo real en Grafana.
+
+![Dashboard Grafana](imagenes/grafana-dashboard.png)
+
+---
+
+## 🛠️ Estructura del Proyecto
+- `/src/prober/`: Código fuente y Dockerfile del microservicio de monitoreo.
+- `/k8s/`: Manifiestos de Kubernetes (Deployment, Service, ServiceMonitor).
+- `/.github/workflows/`: Definición del pipeline de Integración Continua.
