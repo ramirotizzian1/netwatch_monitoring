@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Instalamos FastAPI y Uvicorn (el servidor web)
-RUN pip install --no-cache-dir fastapi uvicorn
+RUN pip install --no-cache-dir fastapi uvicorn pymongo
 
 COPY main.py .
 
