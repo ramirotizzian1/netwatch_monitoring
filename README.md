@@ -6,6 +6,7 @@ Sistema automatizado de monitoreo de disponibilidad y latencia de red, diseñado
 * **Prober Service:** Microservicio en Python que ejecuta pruebas ICMP (Ping) y expone métricas en formato Prometheus.
 * **Contenedores:** Dockerizado sobre imágenes ligeras (`python:3.10-slim`).
 * **CI/CD (DevSecOps):** GitHub Actions con pruebas automatizadas y escaneo estático de vulnerabilidades (`Trivy` y `Bandit`).
+* **Base de Datos (DBaaS):** MongoDB Atlas (NoSQL) integrada en la nube para gestionar el inventario de nodos de red (ej. equipos Cisco, MikroTik, servidores).
 * **Orquestación:** Kubernetes (Minikube).
 * **GitOps:** ArgoCD para la sincronización continua de manifiestos.
 * **Observabilidad:** Kube-Prometheus-Stack (Prometheus + Grafana).
@@ -15,6 +16,60 @@ Sistema automatizado de monitoreo de disponibilidad y latencia de red, diseñado
 ---
 
 ## Despliegue
+
+
+
+## 🏛️ Arquitectura del Sistema
+
+El sistema utiliza una **Arquitectura Híbrida** dividida en dos planos:
+
+1. **Plano de Ejecución y Monitoreo (Local/Edge - Kubernetes):**
+   * **Prober Service:** Microservicio en Python/Docker que ejecuta mediciones de latencia ICMP.
+   * **Prometheus & Grafana:** Stack de observabilidad desplegado vía Helm para la ingesta y visualización de métricas en tiempo real (`netwatch_ping_latency_ms`).
+   * **ArgoCD:** Controlador GitOps que asegura que el estado del clúster coincida con la rama `main` del repositorio.
+
+2. **Plano de Interfaz (Cloud Público):**
+   * **API Gateway:** Microservicio REST (FastAPI) alojado en la nube pública (Render/Cloud Run). Expone el estado de la red y el estado de salud del sistema mediante endpoints HTTPS y documentación interactiva (Swagger UI).
+
+## 🚀 Guía de Despliegue (Disaster Recovery)
+
+Gracias al enfoque GitOps, reconstruir el clúster local desde cero toma menos de 5 minutos:
+
+1. **Iniciar infraestructura base:**
+   `minikube start`
+2. **Instalar el operador GitOps (ArgoCD):**
+   `kubectl create namespace argocd`
+   `kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml`
+3. **Sincronizar el clúster:**
+   Configurar la aplicación en ArgoCD apuntando a la carpeta `/k8s` de este repositorio. El operador desplegará automáticamente los Deployments, Services y ServiceMonitors.
+4. **Desplegar Stack de Monitoreo (Helm):**
+   `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts`
+   `helm install monitoreo prometheus-community/kube-prometheus-stack -n monitoring --create-namespace`
+
+## 📊 Diagramas de Arquitectura
+
+graph TD
+  subgraph Nube Pública
+    A[Repositorio GitHub] --&gt;|CI/CD Pipeline| B(GitHub Actions)
+    B --&gt;|SAST &amp; Build| C[(Docker Hub)]
+    A --&gt;|Auto-Deploy Webhook| D[Render Cloud]
+    D --&gt;|Alojamiento HTTPS| E(API Gateway - FastAPI)
+  end
+
+  subgraph Cloud Data Layer
+    K[MongoDB Atlas (NoSQL DBaaS)]
+  end
+
+  subgraph Entorno Local / Edge K8s
+    F[ArgoCD GitOps] --&gt;|Monitorea Repo| A
+    F --&gt;|Sincroniza Estado| G[Pod: Net-Watch Prober]
+    G --&gt;|ICMP Ping| H((Target: 8.8.8.8))
+    I[Prometheus] --&gt;|Scrapea Métricas| G
+    J[Grafana] --&gt;|Visualiza| I
+  end
+  
+  C -.-&gt;|Descarga Imagen| G
+  E &lt;--&gt;|Lee/Escribe Inventario| K
 
 ### 1. Pipeline CI/CD (GitHub Actions)
 El flujo automatizado compila, escanea y publica la imagen en Docker Hub ante cada commit en la rama `main`.
