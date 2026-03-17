@@ -48,6 +48,7 @@ Gracias al enfoque GitOps, reconstruir el clúster local desde cero toma menos d
 
 ## 📊 Diagramas de Arquitectura
 
+```mermaid
 graph TD
   subgraph Nube Pública
     A[Repositorio GitHub] --&gt;|CI/CD Pipeline| B(GitHub Actions)
@@ -70,6 +71,7 @@ graph TD
   
   C -.-&gt;|Descarga Imagen| G
   E &lt;--&gt;|Lee/Escribe Inventario| K
+```
 
 ### 1. Pipeline CI/CD (GitHub Actions)
 El flujo automatizado compila, escanea y publica la imagen en Docker Hub ante cada commit en la rama `main`.
