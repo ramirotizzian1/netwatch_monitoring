@@ -49,28 +49,30 @@ Gracias al enfoque GitOps, reconstruir el clúster local desde cero toma menos d
 ## 📊 Diagramas de Arquitectura
 
 ```mermaid
+
 graph TD
   subgraph Nube Pública
-    A[Repositorio GitHub] --&gt;|CI/CD Pipeline| B(GitHub Actions)
-    B --&gt;|SAST &amp; Build| C[(Docker Hub)]
-    A --&gt;|Auto-Deploy Webhook| D[Render Cloud]
-    D --&gt;|Alojamiento HTTPS| E(API Gateway - FastAPI)
+    A[Repositorio GitHub] -->|CI/CD Pipeline| B(GitHub Actions)
+    B -->|SAST & Build| C[(Docker Hub)]
+    A -->|Auto-Deploy Webhook| D[Render Cloud]
+    D -->|Alojamiento HTTPS| E(API Gateway - FastAPI)
   end
 
   subgraph Cloud Data Layer
-    K[MongoDB Atlas (NoSQL DBaaS)]
+    K[MongoDB Atlas]
   end
 
   subgraph Entorno Local / Edge K8s
-    F[ArgoCD GitOps] --&gt;|Monitorea Repo| A
-    F --&gt;|Sincroniza Estado| G[Pod: Net-Watch Prober]
-    G --&gt;|ICMP Ping| H((Target: 8.8.8.8))
-    I[Prometheus] --&gt;|Scrapea Métricas| G
-    J[Grafana] --&gt;|Visualiza| I
+    F[ArgoCD GitOps] -->|Monitorea Repo| A
+    F -->|Sincroniza Estado| G[Pod: Net-Watch Prober]
+    G -->|ICMP Ping| H((Target: 8.8.8.8))
+    I[Prometheus] -->|Scrapea Métricas| G
+    J[Grafana] -->|Visualiza| I
   end
   
-  C -.-&gt;|Descarga Imagen| G
-  E &lt;--&gt;|Lee/Escribe Inventario| K
+  C -.->|Descarga Imagen| G
+  E <-->|Lee/Escribe Inventario| K
+  
 ```
 
 ### 1. Pipeline CI/CD (GitHub Actions)
